@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+
+# Java compiled files
+*.class
+bin/
+out/
+
+# macOS
+.DS_Store
+
+# IDE/editor files
+.idea/
+.vscode/
+*.iml
+
+# Eclipse / Java language server files
+.classpath
+.project
+.settings/
+
+# Vim/Neovim swap files
+*.swp
+*.swo
