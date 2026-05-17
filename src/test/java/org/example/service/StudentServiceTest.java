@@ -6,7 +6,9 @@ import org.example.exception.StudentNotFoundException;
 import org.example.exception.InvalidGradeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -116,5 +118,145 @@ class StudentServiceTest {
     assertThrows(
         StudentNotFoundException.class,
         () -> service.getAverageGrade(2));
+  }
+
+  @Test
+  void getAllStudent_shouldReturnAllAddedStudent() {
+    Student student1 = new Student(1, "Alex");
+    Student student2 = new Student(2, "Bob");
+    Student student3 = new Student(3, "Carl");
+
+    service.addStudent(student1);
+    service.addStudent(student2);
+    service.addStudent(student3);
+
+    List<Student> expected = List.of(student1, student2, student3);
+
+    assertEquals(expected, service.getAllStudent());
+  }
+
+  @Test
+  void getAllStudent_shouldThrowExceptionWhenModifierResultList() {
+    List<Student> students = service.getAllStudent();
+
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> students.add(new Student(10, "Georg")));
+  }
+
+  @Test
+  void getAllStudent_shouldReturnEmptyListWhenStudentDoesNotAdded() {
+    assertTrue(service.getAllStudent().isEmpty());
+  }
+
+  @Test
+  void getStudentsWithAverageAbove_shouldReturnValidStudents() {
+    Student student1 = new Student(1, "Alex", List.of(3, 4, 5));
+    Student student2 = new Student(2, "Bob", List.of(4, 5, 5));
+    Student student3 = new Student(3, "Carl", List.of(5, 5, 5));
+
+    service.addStudent(student1);
+    service.addStudent(student2);
+    service.addStudent(student3);
+
+    List<Student> students = service.getStudentsWithAverageAbove(4.5);
+
+    assertFalse(students.contains(student1));
+    assertTrue(students.contains(student2));
+    assertTrue(students.contains(student3));
+  }
+
+  @Test
+  void getStudentsWithAverageAbove_shouldThrowExceptionWhenModifierResultList() {
+    List<Student> students = service.getStudentsWithAverageAbove(4.5);
+
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> students.add(new Student(10, "Georg")));
+  }
+
+  @Test
+  void getStudentsSortedByName_returnStudentsWhichSortedAscByName() {
+    Student student1 = new Student(3, "Alex", List.of(3, 4, 5));
+    Student student2 = new Student(2, "Bob", List.of(4, 5, 5));
+    Student student3 = new Student(1, "Carl", List.of(5, 5, 5));
+
+    service.addStudent(student3);
+    service.addStudent(student2);
+    service.addStudent(student1);
+
+    List<Student> students = service.getStudentsSortedByName();
+
+    assertEquals("Alex", students.get(0).getName());
+    assertEquals("Bob", students.get(1).getName());
+    assertEquals("Carl", students.get(2).getName());
+  }
+
+  @Test
+  void getStudentsSortedByName_shouldThrowExceptionWhenModifierResultList() {
+    List<Student> students = service.getStudentsSortedByName();
+
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> students.add(new Student(10, "Georg")));
+  }
+
+  @Test
+  void getStudentsSortedByAverageDesc_returnStudentsSortedByAverageDesc() {
+    Student student1 = new Student(1, "Alex", List.of(3));
+    Student student2 = new Student(2, "Bob", List.of(4));
+    Student student3 = new Student(3, "Carl", List.of(5));
+    Student student4 = new Student(4, "John", List.of(2));
+
+    service.addStudent(student1);
+    service.addStudent(student2);
+    service.addStudent(student3);
+    service.addStudent(student4);
+
+    List<Student> students = service.getStudentsSortedByAverageDesc();
+
+    assertEquals(5.0, students.get(0).getAverageGrade());
+    assertEquals(4.0, students.get(1).getAverageGrade());
+    assertEquals(3.0, students.get(2).getAverageGrade());
+    assertEquals(2.0, students.get(3).getAverageGrade());
+  }
+
+  @Test
+  void getStudentsSortedByAverageDesc_shouldThrowExceptionWhenModifierResultList() {
+    List<Student> students = service.getStudentsSortedByAverageDesc();
+
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> students.add(new Student(10, "Georg")));
+  }
+
+  @Test
+  void getStudentsMapById_shouldReturnMapWhereKeyIdValueStudentWithThisId() {
+    Student student1 = new Student(1, "Alex", List.of(3));
+    Student student2 = new Student(2, "Bob", List.of(4));
+    Student student3 = new Student(3, "Carl", List.of(5));
+    Student student4 = new Student(4, "John", List.of(2));
+
+    service.addStudent(student1);
+    service.addStudent(student2);
+    service.addStudent(student3);
+    service.addStudent(student4);
+
+    Map<Integer, Student> map = service.getStudentsMapById();
+
+    assertEquals(student1, map.get(1));
+    assertEquals(student2, map.get(2));
+    assertEquals(student3, map.get(3));
+    assertEquals(student4, map.get(4));
+    assertEquals(4, map.size());
+  }
+
+  @Test
+  void getStudentsMapById_shouldThrowExceptionWhenModifierResultMap() {
+    Map<Integer, Student> map = service.getStudentsMapById();
+
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> map.put(100, new Student(100, "Petr")));
   }
 }
