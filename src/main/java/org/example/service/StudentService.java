@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Collections;
+import java.util.function.Function;
 
 public class StudentService {
   private final StudentRepository repository;
@@ -44,24 +45,24 @@ public class StudentService {
     return findStudentById(id).getAverageGrade();
   }
 
-  public List<Student> getAllStudent() {
+  public List<Student> getAllStudents() {
     return repository.findAll();
   }
 
   public List<Student> getStudentsWithAverageAbove(double minAverage) {
-    return getAllStudent().stream()
+    return getAllStudents().stream()
         .filter(student -> student.getAverageGrade() > minAverage)
         .toList();
   }
 
   public List<Student> getStudentsSortedByName() {
-    return getAllStudent().stream()
+    return getAllStudents().stream()
         .sorted(Comparator.comparing(Student::getName))
         .toList();
   }
 
   public List<Student> getStudentsSortedByAverageDesc() {
-    return getAllStudent().stream()
+    return getAllStudents().stream()
         .sorted(Comparator.comparingDouble(Student::getAverageGrade)
             .reversed()
             .thenComparing(Student::getName))
@@ -69,9 +70,9 @@ public class StudentService {
   }
 
   public Map<Integer, Student> getStudentsMapById() {
-    return getAllStudent().stream()
+    return getAllStudents().stream()
         .collect(Collectors.collectingAndThen(
-            Collectors.toMap(Student::getId, student -> student),
+            Collectors.toMap(Student::getId, Function.identity()),
             Collections::unmodifiableMap));
   }
 }

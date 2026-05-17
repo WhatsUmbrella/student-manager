@@ -50,7 +50,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void deleteStudentById_shouldRemovedStudentWhenStudentExist() {
+  void deleteStudentById_shouldRemovedStudentWhenStudentExists() {
     Student student = new Student(1, "Alex");
 
     service.addStudent(student);
@@ -80,7 +80,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void addGradeToStudent_shouldThowExceptionWhenStudentDoesNotExist() {
+  void addGradeToStudent_shouldThrowExceptionWhenStudentDoesNotExist() {
     Student student = new Student(1, "Alex");
     service.addStudent(student);
 
@@ -114,14 +114,14 @@ class StudentServiceTest {
   }
 
   @Test
-  void getAverageGrade_shouldThowExceptionWhenStudentDoesNotExist() {
+  void getAverageGrade_shouldThrowExceptionWhenStudentDoesNotExist() {
     assertThrows(
         StudentNotFoundException.class,
         () -> service.getAverageGrade(2));
   }
 
   @Test
-  void getAllStudent_shouldReturnAllAddedStudent() {
+  void getAllStudents_shouldReturnAllAddedStudents() {
     Student student1 = new Student(1, "Alex");
     Student student2 = new Student(2, "Bob");
     Student student3 = new Student(3, "Carl");
@@ -130,14 +130,16 @@ class StudentServiceTest {
     service.addStudent(student2);
     service.addStudent(student3);
 
-    List<Student> expected = List.of(student1, student2, student3);
-
-    assertEquals(expected, service.getAllStudent());
+    List<Student> students = service.getAllStudents();
+    assertEquals(3, students.size());
+    assertTrue(students.contains(student1));
+    assertTrue(students.contains(student2));
+    assertTrue(students.contains(student3));
   }
 
   @Test
-  void getAllStudent_shouldThrowExceptionWhenModifierResultList() {
-    List<Student> students = service.getAllStudent();
+  void getAllStudents_shouldReturnUnmodifierList() {
+    List<Student> students = service.getAllStudents();
 
     assertThrows(
         UnsupportedOperationException.class,
@@ -145,8 +147,8 @@ class StudentServiceTest {
   }
 
   @Test
-  void getAllStudent_shouldReturnEmptyListWhenStudentDoesNotAdded() {
-    assertTrue(service.getAllStudent().isEmpty());
+  void getAllStudents_shouldReturnEmptyListWhenStudentDoesNotAdded() {
+    assertTrue(service.getAllStudents().isEmpty());
   }
 
   @Test
@@ -167,7 +169,21 @@ class StudentServiceTest {
   }
 
   @Test
-  void getStudentsWithAverageAbove_shouldThrowExceptionWhenModifierResultList() {
+  void getStudentsWithAverageAbove_shouldReturnStudentsHaveAboveAverage() {
+    Student student1 = new Student(1, "Alex", List.of(5, 4, 5));
+    Student student2 = new Student(2, "Bob", List.of(4, 5));
+
+    service.addStudent(student1);
+    service.addStudent(student2);
+
+    List<Student> students = service.getStudentsWithAverageAbove(4.5);
+
+    assertTrue(students.contains(student1));
+    assertFalse(students.contains(student2));
+  }
+
+  @Test
+  void getStudentsWithAverageAbove_shouldReturnUnmodifierList() {
     List<Student> students = service.getStudentsWithAverageAbove(4.5);
 
     assertThrows(
@@ -187,13 +203,15 @@ class StudentServiceTest {
 
     List<Student> students = service.getStudentsSortedByName();
 
-    assertEquals("Alex", students.get(0).getName());
-    assertEquals("Bob", students.get(1).getName());
-    assertEquals("Carl", students.get(2).getName());
+    List<String> names = students.stream()
+        .map(Student::getName)
+        .toList();
+
+    assertEquals(List.of("Alex", "Bob", "Carl"), names);
   }
 
   @Test
-  void getStudentsSortedByName_shouldThrowExceptionWhenModifierResultList() {
+  void getStudentsSortedByName_shouldReturnUnmodifierList() {
     List<Student> students = service.getStudentsSortedByName();
 
     assertThrows(
@@ -215,14 +233,34 @@ class StudentServiceTest {
 
     List<Student> students = service.getStudentsSortedByAverageDesc();
 
-    assertEquals(5.0, students.get(0).getAverageGrade());
-    assertEquals(4.0, students.get(1).getAverageGrade());
-    assertEquals(3.0, students.get(2).getAverageGrade());
-    assertEquals(2.0, students.get(3).getAverageGrade());
+    List<Double> grades = students.stream()
+        .map(Student::getAverageGrade)
+        .toList();
+
+    assertEquals(List.of(5.0, 4.0, 3.0, 2.0), grades);
   }
 
   @Test
-  void getStudentsSortedByAverageDesc_shouldThrowExceptionWhenModifierResultList() {
+  void getStudentsSortedByAverageDesc_returnStudentsSortedByNameAscWhenAverageEqual() {
+    Student student1 = new Student(1, "Alex", List.of(3));
+    Student student2 = new Student(2, "Bob", List.of(3));
+    Student student3 = new Student(3, "Carl", List.of(5));
+
+    service.addStudent(student1);
+    service.addStudent(student2);
+    service.addStudent(student3);
+
+    List<Student> students = service.getStudentsSortedByAverageDesc();
+
+    assertEquals(5.0, students.get(0).getAverageGrade());
+    assertEquals("Alex", students.get(1).getName());
+    assertEquals(3.0, students.get(1).getAverageGrade());
+    assertEquals("Bob", students.get(2).getName());
+    assertEquals(3.0, students.get(2).getAverageGrade());
+  }
+
+  @Test
+  void getStudentsSortedByAverageDesc_shouldReturnUnmodifierList() {
     List<Student> students = service.getStudentsSortedByAverageDesc();
 
     assertThrows(
@@ -252,7 +290,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void getStudentsMapById_shouldThrowExceptionWhenModifierResultMap() {
+  void getStudentsMapById_shouldReturnUnmodifierMap() {
     Map<Integer, Student> map = service.getStudentsMapById();
 
     assertThrows(
