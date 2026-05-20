@@ -2,6 +2,7 @@ package org.example.storage;
 
 //my imports
 import org.example.model.Student;
+import org.example.exception.InvalidGradeException;
 import org.example.exception.StudentStorageException;
 
 //jc imort
@@ -47,12 +48,20 @@ public class FileStudentStorage {
 
   private Student lineToStudent(String line) {
     String[] studentInfo = line.split(";", -1);
+    if (studentInfo.length != 3) {
+      throw new StudentStorageException("Invalid student line format: " + line);
+    }
     Student student = new Student(Integer.parseInt(studentInfo[0]),
         studentInfo[1]);
     if (!studentInfo[2].isBlank()) {
       String[] grades = studentInfo[2].split(",");
-      for (String grade : grades) {
-        student.addGrade(Integer.parseInt(grade));
+      int i = 0;
+      try {
+        for (; i < grades.length; i++) {
+          student.addGrade(Integer.parseInt(grades[i]));
+        }
+      } catch (NumberFormatException | InvalidGradeException e) {
+        throw new StudentStorageException("Invalid grade format: " + grades[i], e);
       }
     }
 
