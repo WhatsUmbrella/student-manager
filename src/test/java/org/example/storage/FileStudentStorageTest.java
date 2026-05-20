@@ -27,21 +27,21 @@ public class FileStudentStorageTest {
   }
 
   @Test
-  void saveStudents_shouldWritetudentsToFile() throws IOException {
+  void saveStudents_shouldWriteStudentsToFile() throws IOException {
     Student student1 = new Student(1, "Alex", List.of(5, 4, 5));
     Student student2 = new Student(2, "Bob", List.of(3, 4));
     Student student3 = new Student(3, "Anna");
     List<Student> students = List.of(student1, student2, student3);
     storage.saveStudents(students, file);
     List<String> lines = Files.readAllLines(file);
-    assertTrue(3 == lines.size());
+    assertEquals(3, lines.size());
     assertTrue(lines.contains("1;Alex;5,4,5"));
     assertTrue(lines.contains("2;Bob;3,4"));
     assertTrue(lines.contains("3;Anna;"));
   }
 
   @Test
-  void loadStudents_shouldReadStudentsToFile() throws IOException {
+  void loadStudents_shouldReadStudentsFromFile() throws IOException {
     List<String> lines = List.of(
         "1;Alex;5,4,5",
         "2;Bob;3,4",
@@ -53,7 +53,7 @@ public class FileStudentStorageTest {
     Student student1 = new Student(1, "Alex", List.of(5, 4, 5));
     Student student2 = new Student(2, "Bob", List.of(3, 4));
     Student student3 = new Student(3, "Anna");
-    assertTrue(students.size() == 3);
+    assertEquals(3, students.size());
     assertTrue(students.contains(student1));
     assertTrue(students.contains(student2));
     assertTrue(students.contains(student3));
@@ -61,11 +61,11 @@ public class FileStudentStorageTest {
 
   @Test
   void loadStudents_shouldReturnStudentWithoutGrades_whenGradesPartIsEmpty() throws IOException {
-    Files.write(file, "3;Anna;".getBytes());
+    Files.write(file, List.of("3;Anna;"));
 
     List<Student> students = storage.loadStudents(file);
 
-    assertTrue(students.size() == 1);
+    assertEquals(1, students.size());
     assertTrue(students.get(0).getGrades().isEmpty());
     assertEquals(0.0, students.get(0).getAverageGrade());
   }
@@ -79,8 +79,16 @@ public class FileStudentStorageTest {
     List<Student> inputStudents = List.of(student1, student2, student3);
     storage.saveStudents(inputStudents, file);
     List<Student> outputStudents = storage.loadStudents(file);
-    assertTrue(inputStudents.size() == outputStudents.size());
-    assertEquals(inputStudents, outputStudents);
+    assertEquals(inputStudents.size(), outputStudents.size());
+    assertEquals(1, outputStudents.get(0).getId());
+    assertEquals("Alex", outputStudents.get(0).getName());
+    assertEquals(List.of(5, 4, 5), outputStudents.get(0).getGrades());
+    assertEquals(2, outputStudents.get(1).getId());
+    assertEquals("Bob", outputStudents.get(1).getName());
+    assertEquals(List.of(3, 4), outputStudents.get(1).getGrades());
+    assertEquals(3, outputStudents.get(2).getId());
+    assertEquals("Anna", outputStudents.get(2).getName());
+    assertTrue(outputStudents.get(2).getGrades().isEmpty());
   }
 
   @Test
@@ -88,6 +96,6 @@ public class FileStudentStorageTest {
     Path nonExistingFile = tempDir.resolve("studnets2.txt");
     assertThrows(
         StudentStorageException.class,
-        () -> storage.loadStudents(nonExistingFile).isEmpty());
+        () -> storage.loadStudents(nonExistingFile));
   }
 }

@@ -14,15 +14,11 @@ import java.util.stream.Collectors;
 
 public class FileStudentStorage {
   public void saveStudents(List<Student> students, Path path) {
-    if (students.isEmpty()) {
-      System.out.println("You submitted an empty list of students");
-      return;
-    }
     List<String> lines = studentsToLines(students);
     try {
       Files.write(path, lines);
-    } catch (IOException e) {
-      throw new StudentStorageException(e.getMessage(), e);
+    } catch (IOException | RuntimeException e) {
+      throw new StudentStorageException("Could not save students to file " + path, e);
     }
   }
 
@@ -32,10 +28,10 @@ public class FileStudentStorage {
     try {
       List<String> lines = Files.readAllLines(path);
       for (String line : lines) {
-        students.add(lineToStudnet(line));
+        students.add(lineToStudent(line));
       }
-    } catch (IOException e) {
-      throw new StudentStorageException(e.getMessage(), e);
+    } catch (IOException | RuntimeException e) {
+      throw new StudentStorageException("Could not load students from file " + path, e);
     }
 
     return students;
@@ -49,11 +45,11 @@ public class FileStudentStorage {
         }).toList();
   }
 
-  private Student lineToStudnet(String line) {
-    String[] studentInfo = line.split(";");
+  private Student lineToStudent(String line) {
+    String[] studentInfo = line.split(";", -1);
     Student student = new Student(Integer.parseInt(studentInfo[0]),
         studentInfo[1]);
-    if (studentInfo.length > 2) {
+    if (!studentInfo[2].isBlank()) {
       String[] grades = studentInfo[2].split(",");
       for (String grade : grades) {
         student.addGrade(Integer.parseInt(grade));
