@@ -98,4 +98,31 @@ public class FileStudentStorageTest {
         StudentStorageException.class,
         () -> storage.loadStudents(nonExistingFile));
   }
+
+  @Test
+  void loadStudents_shouldThrowStorageException_whenLineHasInvalidFormat() throws IOException {
+    Files.write(file, List.of("1;Alex"));
+
+    assertThrows(
+        StudentStorageException.class,
+        () -> storage.loadStudents(file));
+  }
+
+  @Test
+  void loadStudents_shouldThrowStorageException_whenGradeIsNotNumber() throws IOException {
+    Files.write(file, List.of("1;Alex;4,wrong,3"));
+
+    assertThrows(
+        StudentStorageException.class,
+        () -> storage.loadStudents(file));
+  }
+
+  @Test
+  void loadStudents_shouldThrowStorageException_whenGradeIsOutOfRange() throws IOException {
+    Files.write(file, List.of("1;Alex;4,6,3"));
+
+    assertThrows(
+        StudentStorageException.class,
+        () -> storage.loadStudents(file));
+  }
 }
