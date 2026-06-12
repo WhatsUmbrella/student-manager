@@ -12,6 +12,14 @@ public class StudentManager {
     private final FileStudentStorage storage;
 
     public StudentManager(StudentService service, FileStudentStorage storage) {
+        if (service == null) {
+            throw new IllegalArgumentException("Service can't be null.");
+        }
+
+        if (storage == null) {
+            throw new IllegalArgumentException("Storage can't be null.");
+        }
+
         this.service = service;
         this.storage = storage;
     }

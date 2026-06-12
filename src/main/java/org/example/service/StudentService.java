@@ -2,77 +2,78 @@ package org.example.service;
 
 import org.example.repository.StudentRepository;
 import org.example.model.Student;
-import org.example.exception.*;
+import org.example.exception.StudentNotFoundException;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.Collections;
 import java.util.function.Function;
 
 public class StudentService {
-  private final StudentRepository repository;
+    private final StudentRepository repository;
 
-  public StudentService(StudentRepository repository) {
-    this.repository = repository;
-  }
-
-  public void addStudent(Student student) {
-    repository.save(student);
-  }
-
-  public Student findStudentById(int id) {
-    return repository.findById(id)
-        .orElseThrow(
-            () -> new StudentNotFoundException(id));
-  }
-
-  public void deleteStudentById(int id) {
-    if (!repository.existsById(id)) {
-      throw new StudentNotFoundException(id);
+    public StudentService(StudentRepository repository) {
+        if (repository == null) {
+            throw new IllegalArgumentException("Repository can't be null.");
+        }
+        this.repository = repository;
     }
 
-    repository.deleteById(id);
-  }
+    public void addStudent(Student student) {
+        repository.save(student);
+    }
 
-  public void addGradeToStudent(int id, int grade) {
-    Student student = findStudentById(id);
-    student.addGrade(grade);
-  }
+    public Student findStudentById(int id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException(id));
+    }
 
-  public double getAverageGrade(int id) {
-    return findStudentById(id).getAverageGrade();
-  }
+    public void deleteStudentById(int id) {
+        if (!repository.existsById(id)) {
+            throw new StudentNotFoundException(id);
+        }
 
-  public List<Student> getAllStudents() {
-    return repository.findAll();
-  }
+        repository.deleteById(id);
+    }
 
-  public List<Student> getStudentsWithAverageAbove(double minAverage) {
-    return getAllStudents().stream()
-        .filter(student -> student.getAverageGrade() > minAverage)
-        .toList();
-  }
+    public void addGradeToStudent(int id, int grade) {
+        Student student = findStudentById(id);
+        student.addGrade(grade);
+    }
 
-  public List<Student> getStudentsSortedByName() {
-    return getAllStudents().stream()
-        .sorted(Comparator.comparing(Student::getName))
-        .toList();
-  }
+    public double getAverageGrade(int id) {
+        return findStudentById(id).getAverageGrade();
+    }
 
-  public List<Student> getStudentsSortedByAverageDesc() {
-    return getAllStudents().stream()
-        .sorted(Comparator.comparingDouble(Student::getAverageGrade)
-            .reversed()
-            .thenComparing(Student::getName))
-        .toList();
-  }
+    public List<Student> getAllStudents() {
+        return repository.findAll();
+    }
 
-  public Map<Integer, Student> getStudentsMapById() {
-    return getAllStudents().stream()
-        .collect(Collectors.collectingAndThen(
-            Collectors.toMap(Student::getId, Function.identity()),
-            Collections::unmodifiableMap));
-  }
+    public List<Student> getStudentsWithAverageAbove(double minAverage) {
+        return getAllStudents().stream()
+                .filter(student -> student.getAverageGrade() > minAverage)
+                .toList();
+    }
+
+    public List<Student> getStudentsSortedByName() {
+        return getAllStudents().stream()
+                .sorted(Comparator.comparing(Student::getName))
+                .toList();
+    }
+
+    public List<Student> getStudentsSortedByAverageDesc() {
+        return getAllStudents().stream()
+                .sorted(Comparator.comparingDouble(Student::getAverageGrade)
+                        .reversed()
+                        .thenComparing(Student::getName))
+                .toList();
+    }
+
+    public Map<Integer, Student> getStudentsMapById() {
+        return getAllStudents().stream()
+                .collect(Collectors.toUnmodifiableMap(
+                        Student::getId,
+                        Function.identity()));
+    }
 }

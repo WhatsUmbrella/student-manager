@@ -10,131 +10,118 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StudentRepositoryTest {
 
-  @Test
-  void save_shouldSaveStudent() {
-    // Arrange
-    StudentRepository repository = new StudentRepository();
-    Student student = new Student(1, "Alex");
+    @Test
+    void save_shouldSaveStudent() {
+        StudentRepository repository = new StudentRepository();
+        Student student = new Student(1, "Alex");
 
-    // Act
-    repository.save(student);
+        repository.save(student);
 
-    // Assert
-    Optional<Student> result = repository.findById(1);
-    assertTrue(result.isPresent());
-    assertEquals(student, result.get());
-  }
+        Optional<Student> result = repository.findById(1);
+        assertTrue(result.isPresent());
+        assertEquals(student, result.get());
+    }
 
-  @Test
-  void findById_shouldReturnEmptyOptionalWhenStudentDoesNotExist() {
-    // Arrange
-    StudentRepository repository = new StudentRepository();
+    @Test
+    void findById_shouldReturnEmptyOptionalWhenStudentDoesNotExist() {
+        StudentRepository repository = new StudentRepository();
 
-    // Act
-    Optional<Student> result = repository.findById(999);
+        Optional<Student> result = repository.findById(999);
 
-    // Assert
-    assertTrue(result.isEmpty());
-  }
+        assertTrue(result.isEmpty());
+    }
 
-  @Test
-  void findAll_shouldReturnAllStudents() {
-    // Arrange
-    StudentRepository repository = new StudentRepository();
-    Student alex = new Student(1, "Alex");
-    Student bob = new Student(2, "Bob");
+    @Test
+    void findAll_shouldReturnAllStudents() {
+        StudentRepository repository = new StudentRepository();
+        Student alex = new Student(1, "Alex");
+        Student bob = new Student(2, "Bob");
 
-    repository.save(alex);
-    repository.save(bob);
+        repository.save(alex);
+        repository.save(bob);
 
-    // Act
-    List<Student> students = repository.findAll();
+        List<Student> students = repository.findAll();
 
-    // Assert
-    assertEquals(2, students.size());
-    assertTrue(students.contains(alex));
-    assertTrue(students.contains(bob));
-  }
+        assertEquals(2, students.size());
+        assertTrue(students.contains(alex));
+        assertTrue(students.contains(bob));
+    }
 
-  @Test
-  void existsById_shouldReturnTrueWhenStudentExists() {
-    // Arrange
-    StudentRepository repository = new StudentRepository();
-    repository.save(new Student(1, "Alex"));
+    @Test
+    void existsById_shouldReturnTrueWhenStudentExists() {
+        StudentRepository repository = new StudentRepository();
+        repository.save(new Student(1, "Alex"));
 
-    // Act
-    boolean exists = repository.existsById(1);
+        boolean exists = repository.existsById(1);
 
-    // Assert
-    assertTrue(exists);
-  }
+        assertTrue(exists);
+    }
 
-  @Test
-  void existsById_shouldReturnFalseWhenStudentDoesNotExist() {
-    // Arrange
-    StudentRepository repository = new StudentRepository();
+    @Test
+    void existsById_shouldReturnFalseWhenStudentDoesNotExist() {
+        StudentRepository repository = new StudentRepository();
 
-    // Act
-    boolean exists = repository.existsById(1);
+        boolean exists = repository.existsById(1);
 
-    // Assert
-    assertFalse(exists);
-  }
+        assertFalse(exists);
+    }
 
-  @Test
-  void deleteById_shouldDeleteStudent() {
-    // Arrange
-    StudentRepository repository = new StudentRepository();
-    repository.save(new Student(1, "Alex"));
+    @Test
+    void deleteById_shouldDeleteStudent() {
+        StudentRepository repository = new StudentRepository();
+        repository.save(new Student(1, "Alex"));
 
-    // Act
-    repository.deleteById(1);
+        repository.deleteById(1);
 
-    // Assert
-    assertTrue(repository.findById(1).isEmpty());
-  }
+        assertTrue(repository.findById(1).isEmpty());
+    }
 
-  @Test
-  void save_shouldReplaceStudentWithSameId() {
-    // Arrange
-    StudentRepository repository = new StudentRepository();
-    Student oldStudent = new Student(1, "Alex");
-    Student newStudent = new Student(1, "Alexander");
+    @Test
+    void save_shouldReplaceStudentWithSameId() {
+        StudentRepository repository = new StudentRepository();
+        Student oldStudent = new Student(1, "Alex");
+        Student newStudent = new Student(1, "Alexander");
 
-    repository.save(oldStudent);
+        repository.save(oldStudent);
 
-    // Act
-    repository.save(newStudent);
+        repository.save(newStudent);
 
-    // Assert
-    List<Student> students = repository.findAll();
-    assertEquals(1, students.size());
-    assertEquals("Alexander", repository.findById(1).get().getName());
-  }
+        List<Student> students = repository.findAll();
+        assertEquals(1, students.size());
 
-  @Test
-  void findAll_shouldReturnUnmodifiableList() {
-    // Arrange
-    StudentRepository repository = new StudentRepository();
-    repository.save(new Student(1, "Alex"));
+        Student result = repository.findById(1).orElseThrow();
+        assertSame(newStudent, result);
+        assertEquals("Alexander", result.getName());
+    }
 
-    // Act
-    List<Student> students = repository.findAll();
+    @Test
+    void findAll_shouldReturnUnmodifiableList() {
+        StudentRepository repository = new StudentRepository();
+        repository.save(new Student(1, "Alex"));
 
-    // Assert
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> students.add(new Student(2, "Bob")));
-  }
+        List<Student> students = repository.findAll();
 
-  @Test
-  void count_shouldReturnCountOfStudent() {
-    StudentRepository repository = new StudentRepository();
-    repository.save(new Student(1, "Alex"));
-    repository.save(new Student(2, "Bob"));
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> students.add(new Student(2, "Bob")));
+    }
 
-    int countOfStudent = repository.count();
+    @Test
+    void count_shouldReturnCountOfStudents() {
+        StudentRepository repository = new StudentRepository();
+        repository.save(new Student(1, "Alex"));
+        repository.save(new Student(2, "Bob"));
 
-    assertEquals(2, countOfStudent);
-  }
+        int countOfStudents = repository.count();
+
+        assertEquals(2, countOfStudents);
+    }
+
+    @Test
+    void save_shouldThrowExceptionWhenStudentIsNull() {
+        StudentRepository repository = new StudentRepository();
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> repository.save(null));
+    }
 }

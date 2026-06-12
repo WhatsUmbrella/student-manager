@@ -1,5 +1,6 @@
 package org.example.app;
 
+import org.example.exception.StudentStorageException;
 import org.example.model.Student;
 import org.example.service.StudentService;
 import org.example.storage.FileStudentStorage;
@@ -21,6 +22,11 @@ class StudentManagerTest {
     private StudentRepository repository;
     private StudentManager manager;
     private Path file;
+
+    private void assertStudent(Student student, String name, List<Integer> grades) {
+        assertEquals(name, student.getName());
+        assertEquals(grades, student.getGrades());
+    }
 
     @TempDir
     Path tempDir;
@@ -48,6 +54,7 @@ class StudentManagerTest {
         manager.saveToFile(file);
 
         List<String> lines = Files.readAllLines(file);
+
         assertEquals(3, lines.size());
         assertTrue(lines.contains("1;Alex;3,4,5"));
         assertTrue(lines.contains("2;Bob;4,4,3"));
@@ -60,6 +67,7 @@ class StudentManagerTest {
                 "1;Alex;3,4,5",
                 "2;Bob;4,4,3",
                 "3;Carl;5,4,5");
+
         Files.write(file, lines);
 
         manager.loadFromFile(file);
@@ -68,14 +76,11 @@ class StudentManagerTest {
 
         assertEquals(3, students.size());
         Student alex = service.findStudentById(1);
-        assertEquals("Alex", alex.getName());
-        assertEquals(List.of(3, 4, 5), alex.getGrades());
+        assertStudent(alex, "Alex", List.of(3, 4, 5));
         Student bob = service.findStudentById(2);
-        assertEquals("Bob", bob.getName());
-        assertEquals(List.of(4, 4, 3), bob.getGrades());
+        assertStudent(bob, "Bob", List.of(4, 4, 3));
         Student carl = service.findStudentById(3);
-        assertEquals("Carl", carl.getName());
-        assertEquals(List.of(5, 4, 5), carl.getGrades());
+        assertStudent(carl, "Carl", List.of(5, 4, 5));
     }
 
     @Test
@@ -101,15 +106,37 @@ class StudentManagerTest {
 
         assertEquals(3, students.size());
         Student updatedStudent1 = service.findStudentById(1);
-        assertEquals("Anna", updatedStudent1.getName());
-        assertEquals(List.of(5, 5, 5), updatedStudent1.getGrades());
+        assertStudent(updatedStudent1, "Anna", List.of(5, 5, 5));
 
         Student updatedStudent3 = service.findStudentById(3);
-        assertEquals("Cent", updatedStudent3.getName());
-        assertEquals(List.of(4, 4), updatedStudent3.getGrades());
+        assertStudent(updatedStudent3, "Cent", List.of(4, 4));
 
         Student unchangedStudent2 = service.findStudentById(2);
-        assertEquals("Bob", unchangedStudent2.getName());
-        assertEquals(List.of(4, 4, 3), unchangedStudent2.getGrades());
+        assertStudent(unchangedStudent2, "Bob", List.of(4, 4, 3));
+    }
+
+    @Test
+    void loadFromFile_shouldThrowStorageException_whenFileIsInvalid() throws IOException {
+        List<String> lines = List.of("1;Anna");
+
+        Files.write(file, lines);
+
+        assertThrows(
+                StudentStorageException.class,
+                () -> manager.loadFromFile(file));
+    }
+
+    @Test
+    void constructor_shouldThrowExceptionWhenServiceIsNull() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new StudentManager(null, storage));
+    }
+
+    @Test
+    void constructor_shouldThrowExceptionWhenStorageIsNull() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new StudentManager(service, null));
     }
 }

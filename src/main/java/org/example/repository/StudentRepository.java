@@ -8,29 +8,32 @@ import java.util.Map;
 import java.util.Optional;
 
 public class StudentRepository {
-  private final Map<Integer, Student> students = new HashMap<>();
+    private final Map<Integer, Student> students = new HashMap<>();
 
-  public void save(Student student) {
-    students.put(student.getId(), student);
-  }
+    public void save(Student student) {
+        if (student == null) {
+            throw new IllegalArgumentException("Student can't be null.");
+        }
+        students.put(student.getId(), student);
+    }
 
-  public Optional<Student> findById(int id) {
-    return Optional.ofNullable(students.get(id));
-  }
+    public Optional<Student> findById(int id) {
+        return Optional.ofNullable(students.get(id));
+    }
 
-  public List<Student> findAll() {
-    return List.copyOf(students.values());
-  }
+    public List<Student> findAll() {
+        return List.copyOf(students.values());
+    }
 
-  public boolean existsById(int id) {
-    return students.containsKey(id);
-  }
+    public boolean existsById(int id) {
+        return students.containsKey(id);
+    }
 
-  public void deleteById(int id) {
-    students.remove(id);
-  }
+    public void deleteById(int id) {
+        students.remove(id);
+    }
 
-  public int count() {
-    return students.size();
-  }
+    public int count() {
+        return students.size();
+    }
 }
