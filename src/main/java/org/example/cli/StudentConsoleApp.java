@@ -2,6 +2,9 @@ package org.example.cli;
 
 import org.example.service.StudentService;
 import org.example.model.Student;
+import org.example.exception.InvalidGradeException;
+import org.example.exception.StudentNotFoundException;
+
 
 import java.util.Scanner;
 import java.util.List;
@@ -13,6 +16,8 @@ public class StudentConsoleApp {
 
             1. Show all students
             2. Add student
+            3. Add grade to student
+            4. Find student by id
             0. Exit
 
             """;
@@ -54,6 +59,14 @@ public class StudentConsoleApp {
                 addStudent();
                 return true;
             }
+            case 3 -> {
+                addGradeToStudent();
+                return true;
+            }
+            case 4 -> {
+                findStudentById();
+                return true;
+            }
             case 0 -> {
                 System.out.println("Goodbye!");
                 return false;
@@ -89,6 +102,29 @@ public class StudentConsoleApp {
             service.addStudent(new Student(id, name));
             System.out.println("Student added.");
         } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void addGradeToStudent() {
+        int id = readInt("Enter student id: ");
+        int grade = readInt("Enter grade: ");
+
+        try {
+            service.addGradeToStudent(id, grade);
+            System.out.println("Grade added.");
+        } catch (StudentNotFoundException | InvalidGradeException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void findStudentById() {
+        int id = readInt("Enter student id: ");
+
+        try {
+            Student student = service.findStudentById(id);
+            System.out.println(formatStudent(student));
+        } catch (StudentNotFoundException e) {
             System.out.println(e.getMessage());
         }
     }
