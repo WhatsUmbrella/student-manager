@@ -5,10 +5,8 @@ import org.example.model.Student;
 import org.example.exception.InvalidGradeException;
 import org.example.exception.StudentNotFoundException;
 
-
 import java.util.Scanner;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class StudentConsoleApp {
     private static final String MENU = """
@@ -24,6 +22,7 @@ public class StudentConsoleApp {
 
     private final StudentService service;
     private final Scanner scanner;
+    private final StudentFormatter formatter;
 
     public StudentConsoleApp(StudentService service) {
         if (service == null) {
@@ -31,6 +30,7 @@ public class StudentConsoleApp {
         }
         this.service = service;
         this.scanner = new Scanner(System.in);
+        this.formatter = new StudentFormatter();
     }
 
     public void run() {
@@ -87,7 +87,7 @@ public class StudentConsoleApp {
         }
 
         for (Student student : students) {
-            System.out.println(formatStudent(student));
+            System.out.println(formatter.format(student));
         }
     }
 
@@ -123,7 +123,7 @@ public class StudentConsoleApp {
 
         try {
             Student student = service.findStudentById(id);
-            System.out.println(formatStudent(student));
+            System.out.println(formatter.format(student));
         } catch (StudentNotFoundException e) {
             System.out.println(e.getMessage());
         }
@@ -145,21 +145,5 @@ public class StudentConsoleApp {
         }
 
         return number;
-    }
-
-    private String formatStudent(Student student) {
-        String grades;
-        List<Integer> gradesList = student.getGrades();
-
-        if (gradesList.isEmpty()) {
-            grades = "";
-        } else {
-            grades = gradesList.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(", "));
-        }
-
-        return String.format("ID: %d | Name: %s | Average: %.1f | Grades: [%s]",
-                student.getId(), student.getName(), student.getAverageGrade(), grades);
     }
 }
