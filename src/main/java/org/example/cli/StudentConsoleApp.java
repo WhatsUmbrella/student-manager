@@ -2,8 +2,6 @@ package org.example.cli;
 
 import org.example.service.StudentService;
 
-import com.sun.nio.sctp.IllegalUnbindException;
-
 import org.example.model.Student;
 import org.example.exception.InvalidGradeException;
 import org.example.exception.StudentNotFoundException;
@@ -13,7 +11,6 @@ import org.example.app.StudentManager;
 import java.util.Scanner;
 import java.util.List;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class StudentConsoleApp {
     private static final String MENU = """
@@ -25,6 +22,7 @@ public class StudentConsoleApp {
             4. Find student by id
             5. Delete student
             6. Save students to file
+            7. Load students from file
             0. Exit
 
             """;
@@ -39,7 +37,7 @@ public class StudentConsoleApp {
             throw new IllegalArgumentException("Service can't be null.");
         }
         if (manager == null) {
-            throw new IllegalUnbindException("Manager can't be null");
+            throw new IllegalArgumentException("Manager can't be null");
         }
         this.service = service;
         this.scanner = new Scanner(System.in);
@@ -89,10 +87,10 @@ public class StudentConsoleApp {
                 saveStudentsToFile();
                 return true;
             }
-            // case 7 -> {
-            // loadStudentsFromFile();
-            // return true;
-            // }
+            case 7 -> {
+                loadStudentsFromFile();
+                return true;
+            }
             case 0 -> {
                 System.out.println("Goodbye!");
                 return false;
@@ -169,7 +167,7 @@ public class StudentConsoleApp {
     private void saveStudentsToFile() {
         System.out.print("Enter file path: ");
         String filePath = scanner.nextLine();
-        Path path = Paths.get(filePath);
+        Path path = Path.of(filePath);
         try {
             manager.saveToFile(path);
             System.out.println("Students saved.");
@@ -178,17 +176,17 @@ public class StudentConsoleApp {
         }
     }
 
-    // private void loadStudentsFromFile() {
-    // System.out.print("Enter file path: ");
-    // String filePath = scanner.nextLine();
-    // Path path = Paths.get(filePath);
-    // try {
-    // manager.loadFromFile(path);
-    //
-    // } catch (StudentStorageException e) {
-    // System.out.println(e.getMessage());
-    // }
-    // }
+    private void loadStudentsFromFile() {
+        System.out.print("Enter file path: ");
+        String filePath = scanner.nextLine();
+        Path path = Path.of(filePath);
+        try {
+            manager.loadFromFile(path);
+            System.out.println("Students loaded.");
+        } catch (StudentStorageException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
     private int readInt(String prompt) {
         int number;
