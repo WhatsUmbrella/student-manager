@@ -16,6 +16,7 @@ public class StudentConsoleApp {
             2. Add student
             3. Add grade to student
             4. Find student by id
+            5. Delete student
             0. Exit
 
             """;
@@ -65,6 +66,10 @@ public class StudentConsoleApp {
             }
             case 4 -> {
                 findStudentById();
+                return true;
+            }
+            case 5 -> {
+                deleteStudentById();
                 return true;
             }
             case 0 -> {
@@ -124,6 +129,17 @@ public class StudentConsoleApp {
         try {
             Student student = service.findStudentById(id);
             System.out.println(formatter.format(student));
+        } catch (StudentNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void deleteStudentById() {
+        int id = readInt("Enter student id: ");
+
+        try {
+            service.deleteStudentById(id);
+            System.out.println("Student deleted.");
         } catch (StudentNotFoundException e) {
             System.out.println(e.getMessage());
         }
