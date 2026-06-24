@@ -1,12 +1,19 @@
 package org.example.cli;
 
 import org.example.service.StudentService;
+
+import com.sun.nio.sctp.IllegalUnbindException;
+
 import org.example.model.Student;
 import org.example.exception.InvalidGradeException;
 import org.example.exception.StudentNotFoundException;
+import org.example.exception.StudentStorageException;
+import org.example.app.StudentManager;
 
 import java.util.Scanner;
 import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class StudentConsoleApp {
     private static final String MENU = """
@@ -17,6 +24,7 @@ public class StudentConsoleApp {
             3. Add grade to student
             4. Find student by id
             5. Delete student
+            6. Save students to file
             0. Exit
 
             """;
@@ -24,14 +32,19 @@ public class StudentConsoleApp {
     private final StudentService service;
     private final Scanner scanner;
     private final StudentFormatter formatter;
+    private final StudentManager manager;
 
-    public StudentConsoleApp(StudentService service) {
+    public StudentConsoleApp(StudentService service, StudentManager manager) {
         if (service == null) {
             throw new IllegalArgumentException("Service can't be null.");
+        }
+        if (manager == null) {
+            throw new IllegalUnbindException("Manager can't be null");
         }
         this.service = service;
         this.scanner = new Scanner(System.in);
         this.formatter = new StudentFormatter();
+        this.manager = manager;
     }
 
     public void run() {
@@ -72,6 +85,14 @@ public class StudentConsoleApp {
                 deleteStudentById();
                 return true;
             }
+            case 6 -> {
+                saveStudentsToFile();
+                return true;
+            }
+            // case 7 -> {
+            // loadStudentsFromFile();
+            // return true;
+            // }
             case 0 -> {
                 System.out.println("Goodbye!");
                 return false;
@@ -144,6 +165,30 @@ public class StudentConsoleApp {
             System.out.println(e.getMessage());
         }
     }
+
+    private void saveStudentsToFile() {
+        System.out.print("Enter file path: ");
+        String filePath = scanner.nextLine();
+        Path path = Paths.get(filePath);
+        try {
+            manager.saveToFile(path);
+            System.out.println("Students saved.");
+        } catch (StudentStorageException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    // private void loadStudentsFromFile() {
+    // System.out.print("Enter file path: ");
+    // String filePath = scanner.nextLine();
+    // Path path = Paths.get(filePath);
+    // try {
+    // manager.loadFromFile(path);
+    //
+    // } catch (StudentStorageException e) {
+    // System.out.println(e.getMessage());
+    // }
+    // }
 
     private int readInt(String prompt) {
         int number;
